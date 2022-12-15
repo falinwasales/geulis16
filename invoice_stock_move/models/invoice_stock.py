@@ -51,10 +51,10 @@ class InvoiceStockMove(models.Model):
         ('post', 'Post'),
         ('done', 'Received'),
     ],ondelete={
-            'proforma': 'cascade',
-            'proforma2': 'cascade',
-            'post': 'cascade',
-            'done': 'cascade',
+            'proforma': 'set default',
+            'proforma2': 'set default',
+            'post': 'set default',
+            'done': 'set default',
     },tracking=True)
 
     def action_stock_move(self):
