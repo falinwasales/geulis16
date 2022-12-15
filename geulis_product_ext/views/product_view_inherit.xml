@@ -24,9 +24,9 @@
             <xpath expr="//field[@name='fal_vendor_cmt']" position="after">
                 <field name="fal_product_age" string="Age(Day/s)"/>
                 <field name="fal_product_status"/>
-                <field name="fal_last_percen_sale"/>
+                <field name="fal_last_percen_sale" attrs="{'invisible': [('fal_product_status', '!=', 'sale')]}"/>
                 <field name="fal_stock_maintain"/>
-                <field name="fal_display_category" attrs="{'invisible': [('fal_product_status', '=', 'sale')]}"/>
+                <field name="fal_display_category"/>
                 <field name="fal_bin_capacity"/>
                 <field name="fal_bin_to_be_maintained"/>
             </xpath>
