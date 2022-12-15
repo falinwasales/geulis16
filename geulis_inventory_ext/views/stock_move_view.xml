@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<odoo>
+		<record id="view_stock_move_operations_group_component" model="ir.ui.view">
+			<field name="name">view.stock.move.operations.group.component</field>
+			<field name="model">stock.move</field>
+			<field name="inherit_id" ref="stock.view_stock_move_operations"/>
+			<field name="groups_id" eval="[(4, ref('components_group'))]"/>
+			<field name="mode">primary</field>
+			<field name="arch" type="xml">
+				<xpath expr="field[@name='move_line_ids']" position="attributes">
+					<attribute name="readonly">1</attribute>
+				</xpath>
+			</field>
+		</record>
+		<record id="view_stock_move_operations_group_base" model="ir.ui.view">
+			<field name="name">view.stock.move.operations.group.base</field>
+			<field name="model">stock.move</field>
+			<field name="inherit_id" ref="stock.view_stock_move_operations"/>
+			<field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
+			<field name="mode">primary</field>
+			<field name="arch" type="xml">
+				<xpath expr="field[@name='move_line_ids']" position="attributes">
+					<attribute name="readonly">1</attribute>
+				</xpath>
+			</field>
+		</record>
+		<record id="view_stock_move_operations_group_finished" model="ir.ui.view">
+			<field name="name">view.stock.move.operations.group.finished</field>
+			<field name="model">stock.move</field>
+			<field name="inherit_id" ref="stock.view_stock_move_operations"/>
+			<field name="groups_id" eval="[(4, ref('finished_goods_group'))]"/>
+			<field name="mode">primary</field>
+			<field name="arch" type="xml">
+				<xpath expr="field[@name='move_line_ids']" position="attributes">
+					<attribute name="readonly">0</attribute>
+				</xpath>
+			</field>
+		</record>
+	</odoo>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_picking_batch_form_inherit" model="ir.ui.view">
+        <field name="name">stock.picking.batch.form.inherit</field>
+        <field name="model">stock.picking.batch</field>
+        <field name="inherit_id" ref="stock_picking_batch.stock_picking_batch_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/notebook[1]/page[1]" position="replace">
+                <page string="Detailed Operations" attrs="{'invisible': [('state', '=', 'draft')]}">
+                    <field name="move_line_ids" context="{'tree_view_ref': 'stock_picking_batch.view_move_line_tree', 'default_is_group': False}"/>
+                    <button class="oe_highlight" name="action_put_in_pack" type="object" string="Put in Pack" attrs="{'invisible': [('state', 'in', ('draft', 'done', 'cancel'))]}" groups="stock.group_tracking_lot"/>
+                </page>
+            </xpath>
+            <xpath expr="//header/button[@name='action_set_quantities_to_reservation']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>  
+            <xpath expr="//header/button[@name='action_cancel']" position="after">
+                <button name="action_group" string="Group Move Line" type="object" states="in_progress"/>
+                <button name="reset" string="Reset Detailed Operations" type="object" states="in_progress"/>
+            </xpath>
+            <xpath expr="//sheet/notebook[1]/page[3]" position="after">
+                <page string="Grouped Operation">
+                    <field name="move_line_grouped_by_product" context="{'tree_view_ref': 'geulis_inventory_ext.view_move_line_tree_group_product','batch_id':id}"/>
+                </page>
+            </xpath> 
+        </field>
+    </record>
+    <record id="view_move_line_tree_group_product" model="ir.ui.view">
+        <field name="name">view.move.line.tree.group.product</field>
+        <field name="model">stock.move.line.grouped.by.product</field>
+        <field name="arch" type="xml">
+            <tree editable="top" string="Move Lines Grouped Product">
+                <field name="id" invisible="1"/>
+                <field name="product_id"/>
+                <field name="batch_id" invisible="1"/>
+                <field name="total"/>
+                <field name="lot_ids" widget="many2many_tags"/>
+                <field name="company_id"/>
+                <button name="lot_group_wizard" string="register" type="object" context="{'product_id':
+                    product_id,'lot_ids': lot_ids,'id':id,'is_lot_group':True}"/>
+            </tree>
+        </field>
+    </record>
+    <record id="stock_view_picking_form_inherit" model="ir.ui.view">
+        <field name="name">stock.view.picking.form.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_set_quantities_to_reservation']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_batch_grouped_product" model="ir.ui.view">
+        <field name="name">stock.batch.grouped.product</field>
+        <field name="model">stock.move.line.grouped.by.product</field>
+        <field name="arch" type="xml">
+            <form string="Stock Grouped By Product" create="0">
+                <group>
+                    <field name="product_id" readonly="1"/>
+                    <field name="lot_ids" widget="many2many_tags" readonly="1"/>
+                    <field name="deman_per_product" readonly="1"/>
+                    <field name="company_id" invisible="1" readonly="1"/>
+                    <field name="current_total"/>
+                </group>
+                <notebook>
+                    <page string="Grouped By Lot">
+                        <field name="move_line_grouped_by_lot" context="{'tree_view_ref':'geulis_inventory_ext.geulis_move_line_tree'}"/>
+                    </page>
+                </notebook>
+                <footer>
+                    <button name="close_window" string="Save" type="object"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="geulis_move_line_tree" model="ir.ui.view">
+        <field name="name">stock.move.line.grouped.by.lot.tree.view</field>
+        <field name="model">stock.move.line.grouped.by.lot</field>
+        <field name="arch" type="xml">
+            <tree editable="top" string="Move Lines" create="1" delete="1">
+                <field name="product_id"/>
+                <field name="grouped_by_product_id" invisible="1"/>
+                <field name="lot_id" invisible="context.get('is_lot_not_exist')"/>
+                <field name="total_lot"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="geulis_move_line_form" model="ir.ui.view">
+        <field name="name">stock.move.line.grouped.by.lot.tree.view</field>
+        <field name="model">stock.move.line.grouped.by.lot</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="true">
+                <field name="product_id"/>
+                <field name="grouped_by_product_id" invisible="1"/>
+                <field name="lot_id" invisible="context.get('is_lot_not_exist')"/>
+                <field name="total_lot"/>
+                <field name="company_id"/>
+            </form>
+        </field>
+    </record>
+</odoo>
