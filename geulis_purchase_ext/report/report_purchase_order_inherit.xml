@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    	<template id="custom_purchase_order_report">
+    		<t t-call="web.html_container">
+    			<t t-foreach="docs" t-as="doc">
+					<t t-call="web.external_layout">
+						<div class="page">
+							<style>
+				                .page {
+				                    font-size: 11px;
+				                    position:relative;
+				                }
+				                table{
+				                    width: 100%;
+				                }
+				                table, th, td {
+				                  border: 1px solid black;
+				                  border-collapse: collapse;
+				                  text-align: center;
+				                }
+				                .header-custom{
+				                	width: 100%;
+				                	margin-bottom:0px;
+				                }
+				            </style>
+
+				            <div class="header-custom">
+				            	<div class="row">
+					                <div class="col-3 mb4">
+					                    <img t-if="docs.company_id.logo" t-att-src="image_data_uri(docs.company_id.logo)" style="max-height: 45px;" alt="Logo"/>
+					                </div>
+					            </div>
+				            	<div class="row">
+					                <div class="col-6" name="company_address">
+					                    <span t-if="docs.company_id.company_details" t-field="docs.company_id.company_details"></span>
+					                </div>
+					            </div>
+				            </div>
+				 
+				            <center><u><h3 t-if="docs.state in ['draft', 'sent', 'to approve']">Request for Quotation #<span t-field="docs.name"/></h3></u></center>
+				            <center><u><h3 t-if="docs.state in ['purchase', 'done']">Purchase Order #<span t-field="docs.name"/></h3></u></center>
+				            <center><u><h3 t-if="docs.state == 'cancel'">Cancelled Purchase Order #<span t-field="docs.name"/></h3></u></center>
+				            <p style="float:right">Date Order: <t t-esc="docs.create_date" t-options="{'widget': 'date','format': 'dd/MM/yyyy'}"/></p>
+
+				            <div>
+				            	To : <span t-field="docs.partner_id"
+            t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+				            </div>
+				            <t t-set="dowpayment_prod" t-value="docs.get_downpayment_product()"/>
+
+			            	<table class="table table-sm o_main_table">
+					            <thead>
+					                <tr>
+					                    <th name="th_name_prod"><strong>Product Name</strong></th>
+					                    <th name="th_image"><strong>Product Image</strong></th>
+					                    <th name="th_description"><strong>Description</strong></th>
+					                    <th name="th_quantity" class="text-right"><strong>Qty</strong></th>
+					                    <th name="th_price_unit" class="text-right"><strong>Unit Price</strong></th>
+					                    <th name="th_amount" class="text-right"><strong>Amount</strong></th>
+					                </tr>
+					            </thead>
+					            <tbody>
+				                <t t-set="product_tmpl_name" t-value=""/>
+								<t t-set="dplist" t-value="list()"/>
+								<t t-set="paymentAftDp" t-value="list()"/>
+				                <t t-set="qtyTotal" t-value="0"/>
+				                <t t-set="tax_list" t-value="list()"/>
+				                <t t-set="current_subtotal" t-value="0"/>
+				                <t t-foreach="docs.order_line" t-as="line">
+				                    <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+				                    <t t-set="current_subtotal" t-value="current_subtotal + line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+
+				                    <!-- Non Vendor Payment Product Section -->
+				                    <t t-if="line.product_id.product_tmpl_id.display_name != dowpayment_prod">
+					                    <tr t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''">
+					                        <t t-if="not line.display_type">
+					                        	<t t-if="not line.fal_is_downpayment">
+				                                    <t t-set="dummy" t-value="tax_list.append(', '.join(map(lambda x: x.name, line.taxes_id)))"/>
+					                            </t>
+					                            <t t-if="product_tmpl_name == line.product_id.product_tmpl_id.display_name">
+					                                <td id="product_tmpl_name" rowspan="1" style="border-top:none; border-bottom:none;">
+					                                </td>
+					                            </t>
+					                            <t t-elif="line.name == dowpayment_prod">
+					                                <t t-set="product_tmpl_name" t-value="product_tmpl_name"/>
+					                            </t>
+					                            <t t-else="">
+					                                <t t-set="product_tmpl_name" t-value="line.product_id.product_tmpl_id.display_name"/>
+					                                <td id="product_tmpl_name" rowspan="1" style="width:10%;border-bottom:none;">
+					                                    <span t-field="line.product_id.product_tmpl_id.display_name"/>
+					                                </td>
+					                            </t>
+					                            <td id="img_product" style="align">
+					                                <img t-if="line.product_id.product_variant_id.image_1920" t-att-src="image_data_uri(line.product_id.image_1920)" style="width:180px;height:auto;" alt="Logo"/>
+					                            </td>
+					                            <t t-if="not line.fal_is_downpayment">
+					                                <t t-set="qtyTotal" t-value="qtyTotal+line.product_qty"/>
+					                            </t>
+					                            <td id="product">
+					                                <span t-field="line.name"/>
+					                            </td>
+					                            <td class="text-right" style="width:10%;">
+					                                <span t-field="line.product_qty"/>
+					                                <span t-field="line.product_uom.name" groups="uom.group_uom"/>
+					                            </td>
+					                            <td class="text-right" style="width:10%;">
+					                                <span t-field="line.price_unit"/>
+					                            </td>
+					                            <td class="text-right">
+					                                <span t-field="line.price_subtotal"
+					                                    t-options='{"widget": "monetary", "display_currency": docs.currency_id}'/>
+					                            </td>
+					                        </t>
+					                        <t t-if="line.display_type == 'line_section'">
+					                            <td colspan="99" id="section">
+					                                <span t-field="line.name"/>
+					                            </td>
+					                            <t t-set="current_section" t-value="line"/>
+					                            <t t-set="current_subtotal" t-value="0"/>
+					                        </t>
+					                        <t t-if="line.display_type == 'line_note'">
+					                            <td colspan="99" id="note">
+					                                <span t-field="line.name"/>
+					                            </td>
+					                        </t>
+					                    </tr>
+				                	</t>
+
+				                	<!-- Vendor Payment Product Section -->
+				                	<t t-if="line.product_id.product_tmpl_id.display_name == dowpayment_prod">
+				                		<t t-if="line.fal_is_downpayment">
+			                                <t t-set="dummy" t-value="dplist.append(line.dpInPercent)"/>
+			                                <t t-set="dummy" t-value="paymentAftDp.append(line.price_unit)"/>
+			                            </t>
+				                	</t>
+
+				                    <t t-if="current_section and (line_last or docs.order_line[line_index+1].display_type == 'line_section')">
+				                        <tr class="is-subtotal text-right">
+				                            <td colspan="99" id="subtotal">
+				                                <strong class="mr16">Subtotal</strong>
+				                                <span
+				                                    t-esc="current_subtotal"
+				                                    t-options='{"widget": "monetary", "display_currency": docs.currency_id}'
+				                                />
+				                            </td>
+				                        </tr>
+				                    </t>
+				                </t>
+				                <t t-set="tax_totals" t-value="docs.tax_totals"/>
+				                <t t-set="subtotals" t-value="tax_totals['subtotals']"/>
+				                
+				                <t t-if="subtotals">
+				                    <t t-set="ppn" t-value="tax_totals['groups_by_subtotal']['Untaxed Amount']"/>
+				                </t>
+				                <t t-if="dplist">
+				                    <t t-set="finalDPPerc" t-value="dplist[len(dplist)-1]"/>   
+				                </t>
+				                <t t-if="tax_list">
+				                    <t t-set="finalTax" t-value="tax_list[len(tax_list)-1]"/>   
+				                </t>
+				                <t t-if="paymentAftDp">
+				                    <t t-set="finalPaymentAmnt" t-value="paymentAftDp[len(paymentAftDp)-1]"/>  
+				                </t>
+				                <t t-if="finalPaymentAmnt">
+				                    <t t-set="sisaPembayaran" t-value="int(tax_totals['amount_total'])-int(finalPaymentAmnt)"/>
+				                </t>
+				             
+				                <tr>
+				                    <td style="border-bottom:none;"></td>
+				                    <td style="border-bottom:none;"></td>
+				                    <td colspan="1">Total </td>
+				                    <td><t t-esc="float(qtyTotal)"/></td>
+				                    <td></td>
+				                    <t t-if="subtotals">
+				                        <td><span t-esc="subtotals[0]['formatted_amount']"/></td>
+				                    </t>
+				                    <t t-else="">
+				                    	<td><span
+                                        	t-esc="current_subtotal"
+                                        	t-options='{"widget": "monetary", "display_currency": docs.currency_id}'
+                                    	/></td>
+				                    </t>
+				                </tr>
+				                <tr>
+				                    <td style="border-top:none;border-bottom:none;"></td>
+				                    <td style="border-top:none;border-bottom:none;"></td>
+				                    <td colspan="1"><strong>PPN :</strong></td>
+				                    <td></td>
+				                    <td><span t-esc="finalTax"/></td>
+				                    <t t-if="subtotals">
+				                        <td><t t-esc="ppn[0]['formatted_tax_group_amount']"/></td>
+				                    </t>
+				                    <t t-else="">
+				                        <td></td>
+				                    </t>
+				                </tr>
+				                <tr>
+				                    <td style="border-top:none;border-bottom:none;"></td>
+				                    <td style="border-top:none;border-bottom:none;"></td>
+				                    <td colspan="1"><strong>Total + PPN :</strong></td>
+				                    <td></td>
+				                    <td></td>
+				                    <t t-if="subtotals">
+				                        <td><t t-esc="tax_totals['formatted_amount_total']"/></td>
+				                    </t>
+				                    <t t-else="">
+				                        <td></td>
+				                    </t>
+				                </tr>
+				                <tr>
+				                    <td style="border-top:none;;border-bottom:none;"></td>
+				                    <td style="border-top:none;border-bottom:none;"></td>
+				                    <td colspan="1"><strong>DP % :</strong></td>
+				                    <td></td>
+				                    <t t-if="finalDPPerc">
+				                    	<td><t t-esc="finalDPPerc"/> %</td>
+				                    </t>
+				                    <t t-else="">
+				                    	<td></td>
+				                    </t>
+				                    <t t-if="finalPaymentAmnt">
+				                    	<td><t t-esc="float(finalPaymentAmnt)" t-options='{"widget": "monetary", "display_currency": docs.currency_id}'/></td>
+				                    </t>
+				                    <t t-else="">
+				                        <td></td>
+				                    </t> 
+				                </tr>
+				                <tr>
+				                    <td style="border-top:none;border-bottom:none;"></td>
+				                    <td style="border-top:none;border-bottom:none;"></td>
+				                    <td colspan="1"><strong>Sisa Pembayaran :</strong></td>
+				                    <td></td>
+				                    <td></td>
+				                    <t t-if="finalPaymentAmnt">
+				                    	<td><t t-esc="float(sisaPembayaran)" t-options='{"widget": "monetary", "display_currency": docs.currency_id}'/></td>
+				                    </t>
+				                    <t t-else="">
+				                        <td></td>
+				                    </t> 
+				                </tr>
+				                <tr>
+				                    <td style="border-top:none;border-bottom:none;"></td>
+				                    <td style="border-top:none;border-bottom:none;"></td>
+				                    <td>
+				                        <strong>Delivery Date :</strong>
+				                        <br/>
+				                        <strong>Due Date Payment : </strong>
+				                        <br/>
+				                        <strong>Payment Method : </strong>
+				                    </td>
+				                    <td colspan="3" style="width:50px;">
+				                        <span t-field="docs.date_planned" t-options="{'widget': 'date','format': 'dd/MM/yyyy'}"/>
+				                        <br/>
+				                        <span t-field="docs.fal_due_date_payment" t-options="{'widget': 'date','format': 'dd/MM/yyyy'}"/>
+				                        <br/>
+				                        <span>Transfer</span>
+				                    </td>
+				                </tr>
+				                <tr>
+				                    <td></td>
+				                    <td></td>
+				                    <td>
+				                        <strong>Delivery Address: </strong>				                  
+				                    </td>
+				                    <td colspan="3" style="width:50px;">
+				                        <span t-field="docs.picking_type_id.warehouse_id.partner_id"
+				                        t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+				                        <br/>
+				                    </td>
+				                </tr>
+				                <tr>
+				                    <td colspan="8" rowspan="5" style="padding-left:10px;">
+				                        <div>
+				                        	<p>PT. GEULIS BUSANA KREASINDO</p>
+				                            <table style="border:none;border-color: white;">
+				                                <tr style="border:none">
+				                                    <td style="border:none"><span>Regards, </span></td>
+				                                    <td style="width:50px;border:none"></td>
+				                                    <td style="height:130px;border:none"><center><span>Approved By,</span></center></td>
+				                                </tr>
+				                                <tr style="border:none">
+				                                    <td style="border:none"><span>Dora Anna</span></td>
+				                                    <td style="width:50px;border:none"></td>
+				                                    <td style="border:none"><center><span>Vera Pratama</span></center></td>
+				                                </tr>
+				                                <tr style="border:none">
+				                                    <td style="border:none"><center><span>Merchandiser</span></center></td>
+				                                    <td style="width:50px;border:none"></td>
+				                                    <td style="border:none"><center><span>(CEO)</span></center></td>
+				                                </tr>
+				                            </table>
+				                        </div>
+				                    </td>
+				                </tr>
+				            </tbody>
+					        </table>
+					        <p t-field="docs.notes"/>
+            				<div class="oe_structure"/>
+						</div>
+					</t>
+    			</t>
+    		</t>
+    	</template>
+    </data>
+
+  	<record id="report_geulis_purchase" model="ir.actions.report">
+	      <field name="name">Purchase Order(custom)</field>
+	      <field name="model">purchase.order</field>
+	      <field name="report_type">qweb-pdf</field>
+	      <field name="report_name">geulis_purchase_ext.custom_purchase_order_report</field>
+	      <field name="report_file">geulis_purchase_ext.custom_purchase_order_report</field>
+	      <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+	      <field name="print_report_name">(object.name+'.pdf')</field>
+	      <field name="binding_type">report</field>
+  	</record>
+
+  	<record id="geulis_purchase_papercustom" model="report.paperformat">
+        <field name="name">Custom Purchase Paper</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">32</field>
+        <field name="margin_left">4</field>
+        <field name="margin_right">4</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">45</field>
+        <field name="dpi">90</field>
+        <field name="report_ids" eval="[(4,ref('report_geulis_purchase'))]"/>
+    </record>
+
+</odoo>

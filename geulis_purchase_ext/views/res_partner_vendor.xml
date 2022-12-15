@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="partner_vendor_inherit" model="ir.ui.view">
+        <field name="name">partner.vendor.form.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/group/group[1]/field[@name='vat']" position="after">
+                <field name='supplier_rank' attrs="{'invisible':True}"/>
+                <field name='vendor_id' attrs="{'invisible':[(('supplier_rank','=',0))]}"/>
+                <field name='fal_capacity' attrs="{'invisible':[(('supplier_rank','=',0))]}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

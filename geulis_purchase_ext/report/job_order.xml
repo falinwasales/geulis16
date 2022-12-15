@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<template id="job_order_report">
+			<t t-call="web.html_container">
+				<t t-foreach="docs" t-as="doc">
+					<t t-call="web.external_layout">
+						<div class="page">
+							<style>
+				                .page {
+				                    font-size: 11px;
+				                    position:relative;
+				                }
+				                table{
+				                    width: 100%;
+				                }
+				               <!--  table, th, td {
+				                  border: 1px solid black;
+				                  border-collapse: collapse;
+				                  text-align: center;
+				                } -->
+				                .header-custom{
+				                	width: 100%;
+				                	margin-top:0px;
+				                	margin-bottom:0px;
+				                }
+				                th{
+				                	text-align:center;
+				                }
+								.line {
+						            border-bottom: 1px solid black;
+						            margin-top: 15px;
+						            margin-bottom: 15px;
+						            width: 100%;
+						        }
+				      		</style>
+							<div class="header-custom">
+				            	<div class="row">
+					                <div class="col-3 mb4">
+					                    <img t-if="docs.company_id.logo" t-att-src="image_data_uri(docs.company_id.logo)" style="max-height: 45px;" alt="Logo"/>
+					                </div>
+					            </div>
+				            	<div class="row">
+					                <div class="col-6" name="company_address">
+					                    <span t-if="docs.company_id.company_details" t-field="docs.company_id.company_details"></span>
+					                </div>
+					            </div>
+				            </div>
+
+				            <t t-set="p_tmplt" t-value="docs.order_line.filtered(lambda x:not x.fal_is_downpayment).product_template_id"/>
+
+				            <t t-set="products" t-value="docs.groupEveryProduct()"/>
+				            <t t-set="longestSize" t-value="docs.searchLongestSizeVar()"/>
+				            <t t-set="fabrics" t-value="[]"/>
+
+				            <t t-foreach="products" t-as="product">
+				            	<t t-foreach="product['component']" t-as="name">
+				            		<t t-if="name.categ_id.name == 'Fabric' and name.product_tmpl_id.name not in fabrics">
+				            			<t t-set="dummyfabrics" t-value="fabrics.append(name.product_tmpl_id.name)"/>
+				            		</t>
+				            	</t>
+				            </t>
+
+				            <t t-set="fabrics_name" t-value="', '.join(fabrics)"/>
+
+				            <div style="margin-bottom:20px;position:relative;top:2px;float:right">
+		            			<table style="width:80px;"> 
+		            				<thead>
+		            					<tr><th>Photo of Product</th></tr>
+		            				</thead>
+		            				<tbody>
+		            					<t t-if="p_tmplt.image_1920">
+		            						<tr><td><img t-att-src="image_data_uri(p_tmplt.image_1920)" style="width:180px;height:auto;margin:5px;" alt="Logo"/></td></tr>
+		            					</t>
+		            				</tbody>
+		            			</table>
+		            		</div>
+
+				            <div class="container">
+				            	<div class="row">
+				            		<div col="6" style="margin-right:150px">
+				            			Product Name : <span t-esc="p_tmplt.name"/><br/>
+				            			Designer     : <span t-esc="p_tmplt.fal_designer"/><br/>
+				            			PO Date      : <span t-esc="docs.create_date" t-options="{'widget': 'date','format': 'dd/MM/yyyy'}"/><br/>
+				            			<span t-esc="p_tmplt.description"/>
+				            		</div>
+				            	</div>
+				            </div>
+
+				      		<p style="page-break-after: always;"></p>
+				      		<p style="color:red;">FABRICS</p>
+				   			<p t-esc="fabrics_name"/>
+							<table style="border: 1px solid black;border-collapse: collapse;text-align: center;">									
+					            <thead style="display: table-row-group">
+					            	<tr>
+					                    <th name="th_picture" rowspan="2" style="border: 1px solid black;border-collapse: collapse;text-align: center;"><strong>Picture</strong></th>
+					                    <th name="th_code" rowspan="2" style="border: 1px solid black;border-collapse: collapse;text-align: center;"><strong>Code</strong></th>
+					                    <th name="th_color" rowspan="2" style="border: 1px solid black;border-collapse: collapse;text-align: center;"><strong>Color</strong></th>
+					                    <th name="th_quantity" class="text-right" rowspan="2" style="border: 1px solid black;border-collapse: collapse;text-align: center;"><strong><center>Qty</center></strong></th>
+					                    <th name="th_price_unit" class="text-right" rowspan="2" style="border: 1px solid black;border-collapse: collapse;text-align: center;"><strong><center>PMK</center></strong></th>
+					                    <th name="th_amount" class="text-right" t-attf-colspan="{{len(longestSize)}}" style="border: 1px solid black;border-collapse: collapse;text-align: center;"><strong><center>Ratio Cutting</center></strong></th>
+					                    <th name="th_total" rowspan="2"><strong><center>Total</center></strong></th>
+					                </tr>
+					                
+					                <tr>
+					                	<t t-foreach="longestSize" t-as="sizes">
+					                		<td style='width: 50px;border: 1px solid black;border-collapse: collapse;text-align: center;'><span t-esc="sizes"/></td>
+					                	</t>
+					                </tr>  
+					            </thead>
+
+					            <t t-set="totalVer" t-value="0"/>
+					            <t t-set="totalQty" t-value="0"/>
+
+					            <tbody style="margin_bottom:50px;">
+					            	<t t-foreach="products" t-as="product">
+					            	<t t-set="show_sizes" t-value="docs.showSize(product['color'])"/>
+					                <t t-set="total" t-value="0"/>
+					                <t t-set="idxpmk" t-value="[]"/>
+					                <t t-set="idxcode" t-value="0"/>
+					                <t t-set="counter" t-value="0"/>
+					                	<tr style="height:50%;">
+					                		<td style="padding-bottom:5px;padding-top:5px;width:160px;border: 1px solid black;border-collapse: collapse;text-align: center;">
+					                			<t t-set="hr" t-value="0"/>
+					                			<t t-foreach="product['component']" t-as="name">
+					                				<t t-if="name.categ_id.name=='Fabric'">
+					                					<t t-set="idxcode" t-value="idxcode+1"/>
+					                					<t t-if="name.image_1920">
+					                						<div>
+					                							<img t-att-src="image_data_uri(name.image_1920)" style="width:60px;height:60px;vertical-align: middle" alt="Logo"/>
+					                						</div>
+					                					</t>
+				                					  	<t t-set="counter" t-value="counter+1"/>
+				                						<t t-set="dummyidxpmk" t-value="idxpmk.append(counter)"/>
+				                						<br/>
+				                					</t>
+					                				<t t-else="">
+					                				  <t t-set="counter" t-value="counter+1"/>
+					                				</t>
+					                			</t>	
+					                		</td>
+					                		<td style="width:90px;vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;">
+					                			<t t-set="hr" t-value="hr+1"/>
+					                			<t t-foreach="product['component']" t-as="name">
+					                				<t t-if="name.categ_id.name=='Fabric'">
+						                				<div>
+						                					<t t-set="res" t-value="docs.get_color_code(name)"/>
+						                					<t t-if="len(res) &gt; 1">
+						                						#<span t-esc="res[1]"/>
+						                					</t>
+						                					<t t-else="">
+						                						<span></span>
+						                					</t>
+						                					<div class="line" t-if="hr &lt; idxcode"></div>
+						                				</div>
+						                				<t t-set="hr" t-value="hr+1"/>
+					                					<br/>
+					                				</t>
+					                			</t>
+					                		</td>
+					                		<td style="width:90px;vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;">
+					                			<span t-esc="product['color']"/>
+					                		</td>
+					                		<td style="width:90px;vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;">
+					                			<t t-if="idxpmk">
+					                				<t t-set="hr" t-value="0"/>
+					                				<t t-foreach="idxpmk" t-as="idx">
+					                					<div>
+					                						<span t-esc="'{:.2f}'.format(sum(show_sizes)*product['pmk'][idx-1])"/>
+					                						<t t-set="totalQty" t-value="sum(show_sizes)*product['pmk'][idx-1]+totalQty"/>
+					                					</div>
+					                					<div class="line" t-if="hr &lt; len(idxpmk)-1 and len(idxpmk) &gt; 1"></div>
+														<t t-set="hr" t-value="hr+1"/>
+					                					<br/> 
+					                				</t>
+					                			</t>
+						                		
+					                		</td>
+					                		<td style="width:90px;vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;">
+					                			<t t-if="idxpmk">
+					                				<t t-set="hr" t-value="0"/>
+					                				<t t-foreach="idxpmk" t-as="idx">
+					                					<div>
+					                						<span t-esc="product['pmk'][idx-1]"/>
+					                					</div>
+					                					<div class="line" t-if="hr &lt; len(idxpmk)-1 and len(idxpmk) &gt; 1"></div>
+					                					<t t-set="hr" t-value="hr+1"/>
+					                					<br/>
+					                				</t>
+					                			</t>
+					                		</td>
+				                			<t t-foreach="show_sizes" t-as="size">
+					                			<td style="width:90px;vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;">
+					                				<div>
+					                				  <span t-esc="int(size)"/>
+					                				</div>
+					                			</td>
+					                			<t t-set="total" t-value="total+size"/>
+				                			</t>
+					                		<td style="width:90px;vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;"><span t-esc="int(total)"/></td>
+					                		<t t-set="totalVer" t-value="totalVer+total"/>
+					                	</tr>
+					                	<t t-set="idxcode" t-value="0"/>
+					                </t>
+					                <tr style="background-color:#FFFF00">
+					                	<td colspan="3" style="border: 1px solid black;border-collapse: collapse;text-align: center;">Total</td>
+					                	<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"><span t-esc="int(totalQty)"/></td>
+					                	<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"></td>
+					                	<t t-foreach="docs.TotQtySize().values()" t-as="qtyPerSize">
+					                		<td style="border: 1px solid black;border-collapse: collapse;text-align: center;">
+					                			<span t-esc="int(qtyPerSize)"/>
+					                		</td>
+					                	</t>
+					                	<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"><span t-esc="int(totalVer)"/></td>
+					                </tr>
+					               
+					                <t t-set="idxpmk" t-value="[]"/>
+					                <t t-set="counter" t-value="0"/>
+				                	<t t-set="pmkacc" t-value="1"/>
+				                	<t t-set="uniqueacc" t-value="[]"/>
+				                	<t t-foreach="products" t-as="product">
+				                		<t t-foreach="product['component']" t-as="name">
+				                			<t t-set="counter" t-value="counter+1"/>
+				                			<t t-if="name.categ_id.parent_id.name=='Accessories' and name.categ_id.name != 'Size Label' and name.categ_id.name != 'Barcode'">
+				                				<t t-if="name.name not in uniqueacc">
+				                					<t t-set="dummyuniqacc" t-value="uniqueacc.append(name.name)"/>
+				        							<t t-set="dummyidxpmk" t-value="idxpmk.append(counter)"/>
+						                			<tr>
+								                		<t t-if="name.image_1920">
+								                			<td colspan="3" style="padding-bottom:5px;padding-top:5px;vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;"><img t-att-src="image_data_uri(name.image_1920)" style="width:60px;height:60px;" alt="Logo"/></td>
+								                		</t>
+								                		<t t-else="">
+								                			<td colspan="3" style="border: 1px solid black;border-collapse: collapse;text-align: center;"></td>
+								                		</t>
+								                		<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"><span t-esc="0"/></td>
+								                		<td style="vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;">
+						                					<div>
+						                						<span t-esc="product['pmk'][counter-1]"/>
+						                					</div>
+					                					</td>
+							                			<td t-attf-colspan="{{len(longestSize)}}" style="vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;"><span t-esc="name.name"/></td>
+							                			<td style="vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;"><span t-esc="totalVer*product['pmk'][counter-1]"/></td>
+					                				</tr>
+					                			</t>
+					                		</t>
+				                		</t>
+				                		<t t-set="idxpmk" t-value="[]"/>
+					                	<t t-set="counter" t-value="0"/>
+				                	</t>
+				                	<tr>
+				                		<td colspan="3" style="border: 1px solid black;border-collapse: collapse;text-align: center;"></td>
+				                		<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"></td>
+					                	<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"></td>
+				                		<t t-foreach="longestSize" t-as="sizes">
+					                		<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"><span t-esc="sizes"/></td>
+					                	</t>
+					                	<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"></td>
+				                	</tr>
+					                <t t-set="uniqueacc" t-value="[]"/>
+					                <t t-set="idxpmk" t-value="[]"/>
+					                <t t-set="counter" t-value="0"/>
+					                <t t-foreach="products" t-as="product">
+						                <t t-foreach="product['component']" t-as="acc">
+						                	<t t-set="counter" t-value="counter+1"/>
+						                	<t t-if="acc.categ_id.parent_id.name=='Accessories' and acc.categ_id.name == 'Size Label' or acc.categ_id.name == 'Barcode'">
+						                		<t t-if="acc.name not in uniqueacc">
+						                			<t t-set="dummyuniqacc" t-value="uniqueacc.append(acc.name)"/>
+								                	<tr style="background-color:#FFFF00">
+				                						<t t-set="dummyidxpmk" t-value="idxpmk.append(counter)"/>
+								                		<td colspan="3" style="padding-bottom:5px;padding-top:5px;vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;">
+								                			<t t-if="acc.image_1920">
+								                				<img t-att-src="image_data_uri(acc.image_1920)" style="width:60px;height:60px;margin:5px;" alt="Logo"/>
+								                			</t>
+								                			<span t-esc="acc.name"/>
+								                		</td>
+								                		<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"></td>
+									                	<td style="vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;">
+									                		<div>
+						                						<span t-esc="product['pmk'][counter-1]"/>
+						                					</div>
+									                	</td>
+									                	<t t-foreach="docs.TotQtySize().values()" t-as="qtyPerSize">
+									                		<td style="vertical-align: middle;border: 1px solid black;border-collapse: collapse;text-align: center;"><span t-esc="ceil(qtyPerSize * pmkacc)"/></td>
+									                	</t>
+									                	<td style="border: 1px solid black;border-collapse: collapse;text-align: center;"></td>
+								                	</tr>
+							                	</t>
+							                </t>
+						                </t>
+						                <t t-set="idxpmk" t-value="[]"/>
+						                <t t-set="counter" t-value="0"/>
+						            </t>
+					                <tr>
+					                	<td colspan="3" style="border: 1px solid black;border-collapse: collapse;text-align: center;"><strong>DELIVERY DATE</strong></td>
+					                	<td t-attf-colspan="{{len(longestSize)+3}}"><strong><span t-field="docs.date_planned" t-options="{'widget': 'date','format': 'dd/MM/yyyy'}"/></strong></td>
+					                </tr>
+					                <tr>
+					                	<td colspan="3" style="border: 1px solid black;border-collapse: collapse;text-align: center;"><strong>SHIPMENT DESTINATION</strong></td>
+					                	<td t-attf-colspan="{{len(longestSize)+3}}"><strong><span t-field="docs.picking_type_id.warehouse_id.partner_id"
+				                        t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/></strong></td>
+					                </tr>
+					            </tbody>
+							</table>
+
+				            <p style="float:left;">CONFIRMED AND AGREED BY :</p>
+				            <table style="border-color: white;border-collapse: collapse;text-align: center;">
+				            	<tr style="border:none;">
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">Mengetahui</td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">Mengetahui</td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">Pemberi</td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">Penerima</td>
+				            	</tr>
+				            	<tr style="border:none;">
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">Geulis</td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">Geulis</td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">Geulis</td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">PRODUCTION</td>
+				            	</tr>
+				            	<tr style="border:none;">
+				            		<td style="height:50px;border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="height:50px;border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="height:50px;border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>				           
+				            		<td style="height:50px;border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="height:50px;border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="height:50px;border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="height:50px;border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            	</tr>
+				            	<!-- <tr>
+				            		<td style="border:none">Vera Pratama</td>
+				            		<td style="border:none">Novira Karlinda</td>
+				            		<td style="border:none"></td>
+				            		<td style="border:none"></td>
+				            		<td style="border:none">Dora Anna</td>
+				            		<td style="border:none"></td>
+				            		<td style="border:none">Fredy</td>
+				            	</tr> -->
+				            	<tr style="border:none;">
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">(CEO)</td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">(Head Product)</td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">(MERCHANDISER)</td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;"></td>
+				            		<td style="border:none;border-color: white;border-collapse: collapse;text-align: center;">(ATTN)</td>
+				            	</tr>
+				            </table>
+						</div>
+					</t>
+				</t>
+			</t>
+		</template>
+	</data>
+
+  	<record id="report_geulis_job_order" model="ir.actions.report">
+        <field name="name">Job Order</field>
+        <field name="model">purchase.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">geulis_purchase_ext.job_order_report</field>
+        <field name="report_file">geulis_purchase_ext.job_order_report</field>
+        <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+        <field name="print_report_name">('Job Order')</field>
+        <field name="binding_type">report</field>
+    </record>
+
+  <record id="geulis_joborder_papercustom" model="report.paperformat">
+        <field name="name">Custom Job Order Paper</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">4</field>
+        <field name="margin_right">4</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">45</field>
+        <field name="dpi">90</field>
+        <field name="report_ids" eval="[(4,ref('report_geulis_job_order'))]"/>
+    </record>
+</odoo>

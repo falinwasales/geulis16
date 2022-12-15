@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="vendor_type_tree_view" model="ir.ui.view">
+        <field name="name">vendor.type.view.list</field>
+        <field name="model">vendor.type</field>
+        <field name="arch" type="xml">
+            <tree string="Vendor Type" create="1" delete="1">
+                <field name="fal_vendor_type"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="vendor_type_form_view" model="ir.ui.view">
+        <field name="name">vendor.type.view.form</field>
+        <field name="model">vendor.type</field>
+        <field name="arch" type="xml">
+            <form string="Vendor Type">
+                <sheet>
+                    <label for="fal_vendor_type"/>
+                    <h1>
+                        <field name="fal_vendor_type"/>
+                    </h1>
+                    <notebook>
+                        <page string="Vendors">
+                            <field name="vendors_line">
+                                <tree create="0" delete="1">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_vendor_type" model="ir.actions.act_window">
+        <field name="name">Vendor Type</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">vendor.type</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="vendor_type_tree_view"/>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem id="geulis_menu_vendor_type_root" name="Vendor Type" parent="purchase.menu_purchase_config"/>
+    <menuitem id="geulis_menu_vendor_type" name="Vendor Type List" parent="geulis_menu_vendor_type_root" action="action_vendor_type"/>
+</odoo>

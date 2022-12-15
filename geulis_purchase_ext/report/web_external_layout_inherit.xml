@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<!-- <template id="inherit_web_external_layout" inherit_id="web.external_layout_standard">
+		<xpath expr="//div/div[3]/div/span" position="replace">
+			<span t-if="company.company_details" t-field="company.company_details" style="font-size:11px;"/>
+		</xpath>
+	</template> -->
+	<template id="web_external_layout_inherited"  inherit_id="web.external_layout_standard">
+        <xpath expr="//div[@t-attf-class='header o_company_#{company.id}_layout']" position="replace">
+        </xpath>
+    </template>
+</odoo>

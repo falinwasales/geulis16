@@ -1,0 +1,1 @@
+from . import vendor_type, res_partner, purchase, job_order, stock_picking
