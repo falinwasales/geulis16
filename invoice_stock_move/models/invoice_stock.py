@@ -45,16 +45,17 @@ class InvoiceStockMove(models.Model):
                                       default=_get_stock_type_ids,
                                       help="This will determine picking type of incoming shipment")
 
-    state = fields.Selection([
-        ('draft', 'Draft'),
+    state = fields.Selection(selection_add=[
         ('proforma', 'Pro-forma'),
         ('proforma2', 'Pro-forma'),
-        ('posted', 'Posted'),
         ('post', 'Post'),
-        ('cancel', 'Cancelled'),
         ('done', 'Received'),
-    ], string='Status', index=True, readonly=True, default='draft',
-        track_visibility='onchange', copy=False)
+    ],ondelete={
+            'proforma': 'cascade',
+            'proforma2': 'cascade',
+            'post': 'cascade',
+            'done': 'cascade',
+    },tracking=True)
 
     def action_stock_move(self):
         if not self.picking_type_id:
