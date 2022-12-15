@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account_down_ext" model="ir.ui.view">
+        <field name="name">account.down.ext</field>
+        <field name="model">account.move</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <field name="invoice_vendor_bill_id" position="after">
+                <label for="fal_downpayment_auto_complete"/>
+                <div class="o_row">
+                    <field name="fal_downpayment_auto_complete"/>
+                    <button name="button_action" icon="fa-arrow-right" type="object" string="Create Down Payment" class="btn-link" attrs="{'invisible': [('fal_downpayment_auto_complete', '=', False)]}"/>
+                </div>
+            </field>
+        </field>
+    </record>
+</odoo>
