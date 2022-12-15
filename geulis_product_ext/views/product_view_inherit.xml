@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_product_form_inherit" model="ir.ui.view">
+        <field name="name">product.template.product.form.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/notebook/page/group/group[2]/field[@name='company_id']" position="after">
+                <field name='fal_release_date'/>
+                <field name='fal_designer'/>
+                <field name="fal_vendor_cmt"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_product_form_inherit" model="ir.ui.view">
+        <field name="name">product.product.form.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='barcode']" position="after">
+                <field name="fal_product_code"/>
+            </xpath>
+            <xpath expr="//field[@name='fal_vendor_cmt']" position="after">
+                <field name="fal_product_age" string="Age(Day/s)"/>
+                <field name="fal_product_status"/>
+                <field name="fal_last_percen_sale"/>
+                <field name="fal_stock_maintain"/>
+                <field name="fal_display_category" attrs="{'invisible': [('fal_product_status', '=', 'sale')]}"/>
+                <field name="fal_bin_capacity"/>
+                <field name="fal_bin_to_be_maintained"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_search_view_inherit" model="ir.ui.view">
+        <field name="name">product.template.search.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search/group" position="after">
+                <filter string="Nama Vendor CMT" name="fal_vendor_cmt" context="{'group_by':'fal_vendor_cmt'}"/>
+            </xpath>
+            <xpath expr="//search/filter[@name='inactive']" position="after">
+                <filter string="Sort Released Date" name="release_date" date="fal_release_date" context="{'group_by':'fal_release_date','search_default_order_fal_release_date':1}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_kanban_view_inherit" model="ir.ui.view">
+        <field name="name">Product.template.product.kanban.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="default_order">fal_release_date asc, name asc</attribute>
+            </xpath>
+            <xpath expr="//kanban/field[@name='activity_state']" position="after">
+                <field name="fal_release_date"/>
+            </xpath>
+            <xpath expr="//kanban/templates/t/div/div[2]/div[1]" position="after">
+                <div t-if="record.fal_release_date.value">
+                    <span><t t-esc="record.fal_release_date.value and record.fal_release_date.value.split(' ')[0]"/></span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_tree_view_inherit" model="ir.ui.view">
+        <field name="name">product.template.product.tree.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/field[@name='list_price']" position="before">
+                <field name="fal_release_date"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

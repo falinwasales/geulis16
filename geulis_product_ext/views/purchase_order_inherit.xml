@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<record id="geulis_po_form_inherit" model="ir.ui.view">
+        <field name="name">po.add.sum_qty</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+        	<xpath expr="//form/sheet/group[1]/group[1]/field[@name='partner_ref']" position='after'>
+        		<field name='fal_due_date_payment'/>
+                <field name='fal_purchase_type'/>
+                <field name='fal_brand' attrs="{'required': [('fal_purchase_type', '=', 'service')], 'invisible': [('fal_purchase_type', '=', 'product')]}"/>
+                <field name='fal_comment_marketing' attrs="{'invisible': [('fal_purchase_type', '=', 'product')]}"/>
+                <field name='qty_jo' attrs="{'invisible': [('fal_purchase_type', '=', 'product')]}"/>
+                <field name='cutting_qty' attrs="{'invisible': [('fal_purchase_type', '=', 'product')]}"/>
+                <field name='received_qty' attrs="{'invisible': [('fal_purchase_type', '=', 'product')]}"/>
+        	</xpath>
+            <xpath expr="//form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_qty']" position='after'>
+                <field name='cutting_qty' attrs="{'column_invisible': [('parent.fal_purchase_type','=','product')]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_filter_inherit" model="ir.ui.view">
+        <field name="name">request.quotation.select.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search/group" position="inside">
+                <separator/>
+                <filter string="Jenis Pembelian" name="jenis_pembelian" domain="[]" context="{'group_by': 'fal_purchase_type'}"/>
+                <separator/>
+            </xpath>
+            <xpath expr="//search/filter[@name='activities_exception']" position="after">
+                <separator/>
+                <filter string="Jenis Pembelian Jasa" name="jenis_pembelian" domain="[('fal_purchase_type', '=', 'service')]"/>
+                <filter string="Jenis Pembelian Barang" name="jenis_pembelian" domain="[('fal_purchase_type', '=', 'product')]"/>
+                <separator/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_view_search_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.select.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search/group" position="inside">
+                <separator/>
+                <filter string="Jenis Pembelian" name="jenis_pembelian" domain="[]" context="{'group_by': 'fal_purchase_type'}"/>
+                <separator/>
+            </xpath>
+            <xpath expr="//search/filter[@name='activities_exception']" position="after">
+                <separator/>
+                <filter string="Jenis Pembelian Jasa" name="jenis_pembelian" domain="[('fal_purchase_type', '=', 'service')]"/>
+                <filter string="Jenis Pembelian Barang" name="jenis_pembelian" domain="[('fal_purchase_type', '=', 'product')]"/>
+                <separator/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="geulis_po_tree_inherit" model="ir.ui.view">
+        <field name="name">po.tree.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/field[@name='user_id']" position='before'>
+                <field name='fal_product_template_id'/>
+                <field name='fal_brand'/>
+                <field name='fal_comment_marketing'/>
+                <field name='fal_release_date' widget="date"/>
+                <field name='qty_jo'/>
+                <field name='cutting_qty'/>
+                <field name='received_qty'/>
+            </xpath>
+            <xpath expr="//tree/field[@name='date_order']" position='after'>
+                <field name='date_planned'/>
+            </xpath>
+        </field>
+    </record>
+    
+    <record model="ir.ui.view" id="view_purchase_order_kanban_inherit">
+        <field name="name">purchase.order.kanban.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban/field[@name='activity_state']" position="after">
+                <field name="fal_brand"/>
+                <field name="fal_comment_marketing"/>
+                <field name="fal_release_date"/>
+                <field name="qty_jo"/>
+                <field name="cutting_qty"/>
+                <field name="received_qty"/>
+                <field name="date_planned"/>
+                <field name="fal_product_template_id"/>
+            </xpath>
+            <xpath expr="//kanban/templates/t/div/div[1]" position="after">
+                <div class="o_kanban_record_top mb16">
+                    <div class="o_kanban_record_headings ml-1">
+                        <span><t t-esc="record.fal_product_template_id.value"/></span>
+                    </div>
+                </div>
+            </xpath>
+            <xpath expr="//kanban/templates/t/div/div[3]" position="after">
+                <div class="o_kanban_record_bottom">
+                    <div class="oe_kanban_bottom_left">
+                        <span><t t-esc="record.fal_brand.value"/> <t t-esc="record.fal_comment_marketing.value"/></span>
+                    </div>
+                    <div class="oe_kanban_bottom_right">
+                        <span>Release Date:  <t t-esc="record.fal_release_date.value and record.fal_release_date.value.split(' ')[0]"/></span>
+                    </div>
+                </div>
+                <div class="o_kanban_record_bottom">
+                    <span>Date Receipt:  <t t-esc="record.date_planned.value and record.date_planned.value.split(' ')[0]"/></span>
+                </div>
+                <div class="o_kanban_record_bottom">
+                    <span>JO:  <t t-esc="record.qty_jo.value"/></span>
+                </div>
+                <div class="o_kanban_record_bottom">
+                    <span>Cutting:  <t t-esc="record.cutting_qty.value"/></span>
+                </div>
+                <div class="o_kanban_record_bottom">
+                    <span>Received:  <t t-esc="record.received_qty.value"/></span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

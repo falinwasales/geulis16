@@ -1,0 +1,57 @@
+<odoo>
+    <data noupdate="1">
+        <record id="diskon" model="product.template">
+            <field name="name">Diskon</field>
+            <field name="detailed_type">service</field>
+            <field name="sale_ok">True</field>
+            <field name="invoice_policy">order</field>
+            <field name="purchase_ok">True</field>
+            <field name="list_price">0.00</field>
+        </record>
+
+        <record id="diskon_khusus" model="product.template">
+            <field name="name">Diskon Khusus</field>
+            <field name="detailed_type">service</field>
+            <field name="invoice_policy">order</field>
+            <field name="sale_ok">True</field>
+            <field name="purchase_ok">True</field>
+            <field name="list_price">0.00</field>
+        </record>
+
+        <record id="biaya_adm_tokotalk" model="product.template">
+            <field name="name">Biaya Admin TokoTalk</field>
+            <field name="detailed_type">service</field>
+            <field name="sale_ok">True</field>
+            <field name="purchase_ok">True</field>
+            <field name="invoice_policy">order</field>
+            <field name="list_price">0.00</field>
+        </record>
+
+        <record id="biaya_adm_shopee" model="product.template">
+            <field name="name">Biaya Admin Shopee</field>
+            <field name="detailed_type">service</field>
+            <field name="sale_ok">True</field>
+            <field name="purchase_ok">True</field>
+            <field name="invoice_policy">order</field>
+            <field name="list_price">0.00</field>
+        </record>
+
+        <record id="biaya_pengiriman" model="product.template">
+            <field name="name">Biaya Pengiriman</field>
+            <field name="detailed_type">service</field>
+            <field name="sale_ok">True</field>
+            <field name="purchase_ok">True</field>
+            <field name="invoice_policy">order</field>
+            <field name="list_price">0.00</field>
+        </record>
+
+        <record id="poin" model="product.template">
+            <field name="name">Poin</field>
+            <field name="detailed_type">service</field>
+            <field name="sale_ok">True</field>
+            <field name="purchase_ok">True</field>
+            <field name="invoice_policy">order</field>
+            <field name="list_price">0.00</field>
+        </record>
+    </data>
+</odoo>
