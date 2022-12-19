@@ -185,6 +185,8 @@ class StockGroupedByProduct(models.Model):
 				if lot_total[count]['total'] <= 0:
 					remaining = abs(lot_total[count]['total'])
 					count+=1
+					if count > lot_total_count-1:
+						break
 					# This loops stop when the next lot still has quantity to be assign to next stock move line
 					while count <= lot_total_count-1:
 						if lot_total[count]['total'] >= remaining:
